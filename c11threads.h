@@ -42,7 +42,9 @@ typedef struct {
 enum {
 	mtx_plain		= 0,
 	mtx_recursive	= 1,
+#if !__APPLE__
 	mtx_timed		= 2,
+#endif
 	mtx_try			= 4
 };
 
@@ -129,9 +131,11 @@ static inline int mtx_init(mtx_t *mtx, int type)
 	if(type & mtx_try) {
 		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
 	}
+#if !__APPLE__
 	if(type & mtx_timed) {
 		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_TIMED_NP);
 	}
+#endif
 	if(type & mtx_recursive) {
 		pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
 	}
@@ -164,6 +168,7 @@ static inline int mtx_trylock(mtx_t *mtx)
 	return res == 0 ? thrd_success : thrd_error;
 }
 
+#if !__APPLE__
 static inline int mtx_timedlock(mtx_t *mtx, const xtime *xt)
 {
 	int res;
@@ -177,6 +182,7 @@ static inline int mtx_timedlock(mtx_t *mtx, const xtime *xt)
 	}
 	return res == 0 ? thrd_success : thrd_error;
 }
+#endif
 
 static inline int mtx_unlock(mtx_t *mtx)
 {
